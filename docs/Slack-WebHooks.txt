@@ -1,0 +1,65 @@
+===================================================
+=== Slack Rest Controller - slack web hooks:
+===  - send slack messages from GoCD (and slackbot)
+===================================================
+
+=========================
+=== message from GoCD ===
+=========================
+GoCD will HTTP Get the following to SlackBot:
+curl -X GET "http://localhost:8765/slack/webhook?
+pipeline=%GO_PIPELINE_NAME%
+&instance=%GO_PIPELINE_COUNTER%
+&stage=%GO_STAGE_NAME%"
+
+================
+=== Request
+================
+
+	@RequestMapping(method = RequestMethod.GET, value = "/webhook")
+	public ResponseEntity<String> sendWebhookMessage(@RequestParam(value = "pipeline") String pipeline,@RequestParam(value = "instance") String instance,@RequestParam(value = "stage") String stage)
+	
+	if stage = "ProjectTeamRequest4Approval" 
+		send approvalMessage to #business-approvals
+	else if stage = "BusinessApproval" 
+		send deploymentNotificationMessage to #deployments
+	else if stage = "push" 
+		send deployedNotificationMessage to #deployments
+	
+================
+=== Response 
+================
+	HTTP 200
+	some text
+
+=====================================
+=== approvalMessage
+=====================================
+	Need "instance" of the pipeline for message buttons:
+
+		approve: new Action("1", "approve", "Approve", "button", instance, "primary", new Confirm("Please confirm your decision", "Are you sure you want to approve this build?", "Yes", "No"));
+		reject:  new Action("2", "reject", "Reject", "button", instance, "danger", new Confirm("Please confirm your decision", "Are you sure you want to reject this build?", "Yes", "No"));
+		
+		new Attachment(
+				"Click 'Approve' after successful application checkout.\n*Feature List:*\n*1. F1234: JSON only UI*\n*2. F1235: Issuers List*  Application Link: http://35.241.60.10/portfolio/issuers\n*3. F1236: Ratings List*  Application Link: http://35.241.60.10/security-rating/ratings",
+				"You are unable to approve a deployment", "approve", "#3AA3E3", "default", null, null, null, null, null,
+				null, null, null, null, null, null, null, null, actions);
+		
+		new RichMessage("##business-approvals", "PortfolioManagementApplication Deployment",
+				":question: Please approve a deployment to production.", ":question:", "in_channel", attachments);
+
+=====================================
+=== deploymentNotificationMessage
+=====================================
+		new RichMessage("##deployments", "PortfolioManagementApplication Deployment",
+				":racing_car: A production deployment is in progress! Click here for details:\n https://localhost:8154/go/pipelines/value_stream_map/"
+						+ pipeline + "/" + instance,
+				":racing_car:", "in_channel", null);
+
+=====================================
+=== deployedNotificationMessage
+=====================================
+		new RichMessage("##deployments", "PortfolioManagementApplication Deployment",
+				":checkered_flag: A production deployment complete successfully! Click here for details:\n https://localhost:8154/go/pipelines/value_stream_map/"
+						+ pipeline + "/" + instance,
+				":checkered_flag:", "in_channel", null);

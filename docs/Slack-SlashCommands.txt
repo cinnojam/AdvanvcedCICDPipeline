@@ -1,0 +1,89 @@
+============================================
+=== Slack Rest Controller - slash commands
+============================================
+
+================================================
+=== slack slash command response example     ===
+================================================
+Slack will HTTP Post the following parameters in the message body to 
+the URL specified in https://api.slack.com/apps --> Slash Commands --> Request URL
+
+token=gIkuvaNzQIHg97ATvDxqgjtO
+&team_id=T0001
+&team_domain=example
+&enterprise_id=E0001
+&enterprise_name=Globular%20Construct%20Inc
+&channel_id=C2147483705
+&channel_name=test
+&user_id=U2147483697
+&user_name=Steve
+&command=/weather
+&text=94070
+&response_url=https://hooks.slack.com/commands/1234/5678
+&trigger_id=13345224609.738474920.8088930838d88f008e0
+
+================================================
+
+
+================
+=== Request
+================
+	@RequestMapping(consumes = {MediaType.APPLICATION_FORM_URLENCODED_VALUE }, method = RequestMethod.POST, value = "/receive/slash-command")
+	public ResponseEntity<RichMessage> receiveSlashCommand(@RequestParam("token") String token,
+			@RequestParam("team_id") String teamId, @RequestParam("team_domain") String teamDomain,
+			@RequestParam("channel_id") String channelId, @RequestParam("channel_name") String channelName,
+			@RequestParam("user_id") String userId, @RequestParam("user_name") String userName,
+			@RequestParam("command") String command, @RequestParam("text") String text,
+			@RequestParam("response_url") String responseUrl)
+
+	* make sure "token" value = SlackConfig.verificationToken
+	
+================
+=== Response 
+================
+
+Command = "/echo"
+	if request text = "help"
+		response text = "I echo back what you tell me.\nTry typing `/echo hello` to see."
+		response type = "ephemeral"
+	else
+		response text = echo back request parameters in the response text
+		response type = "in_channel"
+
+Command = "/approve"
+	if request text = "help"
+		resposne text = "I provide your business approval for a production release. Try typing `/approve -1` to see."
+		response type = "ephemeral"
+	else
+		* approve pipeline
+		response text = userName + " approved pipeline " + text + " for deployment to production."
+		response type = "in_channel"
+
+Command = other
+		response text = "I'm afraid I don't know how to " + command + " yet."
+		response type = "ephemeral"
+
+
+================
+* approve (send user & pipeline# value from request, return responseText)
+================
+		// post to GoCD
+		String url = "https://" + user + ":" + config.getP() + "@localhost:8154/go/run/PortfolioManagementApplication/"+value+"/BusinessApproval";
+		ProcessBuilder pb =  new ProcessBuilder("curl", "-XPOST", url, "-k", "-H", "Confirm: true");
+		 File log = new File("d:\\log.txt");
+		 pb.redirectErrorStream(true);
+		 pb.redirectOutput(Redirect.appendTo(log));
+		try {
+			pb.start();
+		} catch (IOException e) {
+			logger.error("Error calling GoCD",e);
+		}
+		// Send same responseText in response and to #Deployments channel 
+		String responseText = ":heavy_check_mark: " + user + " approved pipeline " + value + " for deployment to production.\nPipeline Link: https://localhost:8154/go/pipelines/value_stream_map/PortfolioManagementApplication/"+value;
+
+================
+* reject pipeline (send user & pipeline# value from request)
+================
+		// Send same responseText in response and to #Deployments channel 
+		String responseText = ":x: " + user + " rejected pipeline " + value + " for deployment to production.\nPipeline Link: https://localhost:8154/go/pipelines/value_stream_map/PortfolioManagementApplication/"+value;
+

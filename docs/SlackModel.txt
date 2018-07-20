@@ -1,0 +1,177 @@
+=====================
+=== Action
+=====================
+	private String id;
+	private String name;
+	private String text;
+	private String type;
+	private String value;
+	private String style;
+	private Confirm confirm;
+
+=====================
+=== Attachment
+=====================
+	private String text;
+	private String fallback;
+	@JsonProperty("callback_id")
+	private String callbackId;
+	private String color;
+	@JsonProperty("attachment_type")
+	private String attachmentType;
+	private String pretext;
+	@JsonProperty("author_name")
+	private String authorName;
+	@JsonProperty("author_link")
+	private String authorLink;
+	@JsonProperty("author_icon")
+	private String authorIcon;
+	private String title;
+	@JsonProperty("title_link")
+	private String titleLink;
+	private Field[] fields;
+	@JsonProperty("image_url")
+	private String imageUrl;
+	@JsonProperty("thumb_url")
+	private String thumbUrl;
+	private String footer;
+	@JsonProperty("footer_icon")
+	private String footerIcon;
+	private String ts;
+	@JsonProperty("mrkdwn_in")
+	private List<String> markdownIn;
+	private Action[] actions;
+
+=====================
+=== Confirm
+=====================
+	private String title;
+	private String text;
+	@JsonProperty("ok_text")
+	private String okText;
+	@JsonProperty("dismiss_text")
+	private String dismissText;
+
+=====================
+=== Event
+=====================
+	private String type;
+	private String token;
+	private String challenge;
+	private int id;
+	private String subtype;
+	@JsonProperty("bot_id")
+	private String botId;
+	@JsonProperty("channel_id")
+	private String channelId;
+	@JsonProperty("user_id")
+	private String userId;
+	private String text;
+	private Edited edited;
+	private Error error;
+	private boolean ok;
+	@JsonProperty("reply_to")
+	private int replyTo;
+	@JsonProperty("is_starred")
+	private boolean isStarred;
+	@JsonProperty("pinned_to")
+	private String[] pinnedTo;
+	private Channel channel;
+	private Channel[] ims;
+	private Item item;
+	private Bot bot;
+	private File file;
+	@JsonProperty("file_id")
+	private String fileId;
+	private User user;
+	@JsonProperty("has_pins")
+	private boolean hasPins;
+	private Reaction[] reactions;
+	private boolean upload;
+	private boolean hidden;
+	private String latest;
+	private String presence;
+	private Comment comment;
+	@JsonProperty("comment_id")
+	private String commentId;
+	private String reaction;
+	@JsonProperty("item_user")
+	private String itemUser;
+	private String[] names;
+	private String value;
+	private String plan;
+	private String url;
+	private String domain;
+	@JsonProperty("email_domain")
+	private String emailDomain;
+	@JsonProperty("team")
+	private String teamId;
+	private UserGroup subteam;
+	@JsonProperty("subteam_id")
+	private String subteamId;
+	@JsonProperty("dnd_status")
+	private DndStatus dndStatus;
+	private String ts;
+	@JsonProperty("thread_ts")
+	private String threadTs;
+	@JsonProperty("deleted_ts")
+	private String deletedTs;
+	@JsonProperty("event_ts")
+	private String eventTs;
+	private Message message;
+	private Attachment[] attachments;
+	@JsonProperty("response_metadata")
+	private ResponseMetadata responseMetadata;
+
+=====================
+=== Payload
+=====================
+	private String type;
+	private Action[] actions;
+	@JsonProperty("callback_id")
+	private String callbackId;
+	private Team team;
+	private Channel channel;
+	private User user;
+	@JsonProperty("action_ts")
+	private String actionTs;
+	@JsonProperty("message_ts")
+	private String messageTs;
+	@JsonProperty("attachment_id")
+	private String attachmentId;
+	private String token;
+	@JsonProperty("is_app_unfurl")
+	private boolean isAppUnfurl;
+	@JsonProperty("response_url")
+	private String responseUrl;
+	@JsonProperty("trigger_id")
+	private String triggerId;
+	@JsonProperty("original_message")
+	private RichMessage originalMessage;
+
+=====================
+=== RichMessage
+=====================
+  private String channel;
+  private String username;
+  private String text;
+  @JsonProperty("icon_emoji")
+  private String iconEmoji;
+  @JsonProperty("response_type")
+  private String responseType;
+	@JsonProperty("is_app_unfurl")
+	private boolean isAppUnfurl;
+	@JsonProperty("bot_id")
+	private String botId;
+	private String type;
+	private String subType;
+	private String ts;
+  private Attachment[] attachments;
+
+=====================
+=== Team
+=====================
+	private String id;
+	private String name;
+	private String domain;
+

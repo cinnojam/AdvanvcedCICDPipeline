@@ -1,0 +1,65 @@
+============================================
+=== Slack Rest Controller - slash commands
+============================================
+
+================================================
+=== message button response: approve clicked ===
+================================================
+Slack will Http Post the following to 
+the URL specified in https://api.slack.com/apps --> Slash Commands --> Request URL
+
+2018-07-17 21:56:00.424 DEBUG 1816 --- [nio-8765-exec-7] o.a.coyote.http11.Http11InputBuffer      : Received [POST /slack/receive HTTP/1.1
+x-real-ip: 34.228.6.255
+x-forwarded-for: 34.228.6.255
+host: pipeline-approval2.localtunnel.me
+x-forwarded-proto: https
+x-nginx-proxy: true
+connection: close
+content-length: 2113
+user-agent: Slackbot 1.0 (+https://api.slack.com/robots)
+accept-encoding: gzip,deflate
+accept: application/json,*/*
+x-slack-signature: v0=3068ad7f8238c8f9aac315930076fe30376955e46a5637fd090b357483c0d7b2
+x-slack-request-timestamp: 1531882561
+content-type: application/x-www-form-urlencoded
+
+payload=%7B%22type%22%3A%22interactive_message%22%2C%22actions%22%3A%5B%7B%22name%22%3A%22approve%22%2C%22type%22%3A%22button%22%2C%22value%22%3A%2299%22%7D%5D%2C%22callback_id%22%3A%22approve%22%2C%22team%22%3A%7B%22id%22%3A%22TBPS257A6%22%2C%22domain%22%3A%22injam-pipeline%22%7D%2C%22channel%22%3A%7B%22id%22%3A%22CBQ0QEC69%22%2C%22name%22%3A%22deployments%22%7D%2C%22user%22%3A%7B%22id%22%3A%22UBQT33L3Z%22%2C%22name%22%3A%22cinnojam%22%7D%2C%22action_ts%22%3A%221531882561.168984%22%2C%22message_ts%22%3A%221531882545.000139%22%2C%22attachment_id%22%3A%221%22%2C%22token%22%3A%22bI9SEg6gbbKc98KS5NVpb8L4%22%2C%22is_app_unfurl%22%3Afalse%2C%22original_message%22%3A%7B%22text%22%3A%22Please+approve+a+deployment+to+production.%22%2C%22bot_id%22%3A%22BBSB0HCJE%22%2C%22attachments%22%3A%5B%7B%22callback_id%22%3A%22approve%22%2C%22fallback%22%3A%22You+are+unable+to+approve+a+deployment%22%2C%22text%22%3A%22Click+%27Approve%27+after+successful+]
+Name: payload; Value: {"type":"interactive_message","actions":[{"name":"approve","type":"button","value":"99"}],"callback_id":"approve","team":{"id":"TBPS257A6","domain":"injam-pipeline"},"channel":{"id":"CBQ0QEC69","name":"deployments"},"user":{"id":"UBQT33L3Z","name":"cinnojam"},"action_ts":"1531883866.078221","message_ts":"1531883377.000023","attachment_id":"1","token":"bI9SEg6gbbKc98KS5NVpb8L4","is_app_unfurl":false,"original_message":{"text":"Please approve a deployment to production.","bot_id":"BBSB0HCJE","attachments":[{"callback_id":"approve","fallback":"You are unable to approve a deployment","text":"Click 'Approve' after successful application checkout.","id":1,"color":"3AA3E3","actions":[{"id":"1","name":"approve","text":"Approve","type":"button","value":"99","style":"primary","confirm":{"text":"Are you sure you want to approve this build?","title":"Please confirm your decision","ok_text":"Yes","dismiss_text":"No"}},{"id":"2","name":"reject","text":"Reject","type":"button","value":"99","style":"danger","confirm":{"text":"Are you sure you want to reject this build?","title":"Please confirm your decision","ok_text":"Yes","dismiss_text":"No"}}]}],"type":"message","subtype":"bot_message","ts":"1531883377.000023"},"response_url":"https:\/\/hooks.slack.com\/actions\/TBPS257A6\/400197099508\/NvXFbhC20mGbr8tx5zCDzMrL","trigger_id":"400579224117.397886177346.ac6ea67162a48991258a1dfe8eda595b"}
+
+================
+=== Request
+================
+
+	@RequestMapping(consumes = {MediaType.APPLICATION_FORM_URLENCODED_VALUE }, method = RequestMethod.POST, value = "/receive/message")
+	public ResponseEntity<RichMessage> receiveInteractiveMessage(-EITHER- @RequestParam("payload") Payload payload -OR- WebRequest request)
+	
+================
+=== Response 
+================
+	if payload.action.name = "approve" then *approve
+	else if payload.action.name = "reject" then *reject
+	else reply with text = "I dont know what to do with this." and type = "ephemeral"
+	
+================
+* approve (send user & pipeline# value from request, return responseText)
+================
+		// post to GoCD
+		String url = "https://" + user + ":" + config.getP() + "@localhost:8154/go/run/PortfolioManagementApplication/"+value+"/BusinessApproval";
+		ProcessBuilder pb =  new ProcessBuilder("curl", "-XPOST", url, "-k", "-H", "Confirm: true");
+		 File log = new File("d:\\log.txt");
+		 pb.redirectErrorStream(true);
+		 pb.redirectOutput(Redirect.appendTo(log));
+		try {
+			pb.start();
+		} catch (IOException e) {
+			logger.error("Error calling GoCD",e);
+		}
+		// Send same responseText in response and to #Deployments channel 
+		String responseText = ":heavy_check_mark: " + user + " approved pipeline " + value + " for deployment to production.\nPipeline Link: https://localhost:8154/go/pipelines/value_stream_map/PortfolioManagementApplication/"+value;
+
+================
+* reject pipeline (send user & pipeline# value from request)
+================
+		// Send same responseText in response and to #Deployments channel 
+		String responseText = ":x: " + user + " rejected pipeline " + value + " for deployment to production.\nPipeline Link: https://localhost:8154/go/pipelines/value_stream_map/PortfolioManagementApplication/"+value;
+

@@ -1,0 +1,13 @@
+
+// Install the localtunnel 
+install node & npm: https://nodejs.org/en/download/
+npm install -g localtunnel
+
+// start the tunnel
+//    - 1. >1 domain are needed since the tunnel crashes occasionally and locks up the domain for ~24 hours
+//    - 2. port = the port that SlackBot is running on
+//    - 3. Slack --> <mysubdomain>.localtunnel.me (secured w https & oauth) --> locahost:8765 (via SSL Tunnel)
+lt --port 8765 --subdomain pipeline-approval
+- or -
+lt --port 8765 --subdomain pipeline-approval2
+

@@ -44,15 +44,29 @@ Name: payload; Value: {"type":"interactive_message","actions":[{"name":"approve"
 * approve (send user & pipeline# value from request, return responseText)
 ================
 		// post to GoCD
-		String url = "https://" + user + ":" + config.getP() + "@localhost:8154/go/run/PortfolioManagementApplication/"+value+"/BusinessApproval";
-		ProcessBuilder pb =  new ProcessBuilder("curl", "-XPOST", url, "-k", "-H", "Confirm: true");
-		 File log = new File("d:\\log.txt");
-		 pb.redirectErrorStream(true);
-		 pb.redirectOutput(Redirect.appendTo(log));
+		String url = "https://" + user + ":" + config.getP() + "@localhost:8154/go/run/" + value + "/BusinessApproval";
+		ProcessBuilder pb = new ProcessBuilder("curl", "-XPOST", url, "-k", "-H", "Confirm: true");
 		try {
-			pb.start();
-		} catch (IOException e) {
-			logger.error("Error calling GoCD",e);
+			Process process = pb.start();
+			BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+			BufferedReader readerErr = new BufferedReader(new InputStreamReader(process.getErrorStream()));
+			StringBuilder builder = new StringBuilder();
+			String line = null;
+			while (process.isAlive()) {
+				Thread.sleep(500);
+			}
+			while ((line = reader.readLine()) != null) {
+				builder.append(line);
+				builder.append(System.getProperty("line.separator"));
+			}
+			while ((line = readerErr.readLine()) != null) {
+				builder.append(line);
+				builder.append(System.getProperty("line.separator"));
+			}
+			String result = builder.toString();
+			logger.info("GoCD Exit code: " + process.exitValue() + "; Response Text: \r\n" + result);
+		} catch (IOException | InterruptedException e) {
+			logger.error("Error calling GoCD", e);
 		}
 		// Send same responseText in response and to #Deployments channel 
 		String responseText = ":heavy_check_mark: " + user + " approved pipeline " + value + " for deployment to production.\nPipeline Link: https://localhost:8154/go/pipelines/value_stream_map/PortfolioManagementApplication/"+value;
